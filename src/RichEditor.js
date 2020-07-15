@@ -1,8 +1,8 @@
-import React, {Component} from 'react';
-import {WebView} from 'react-native-webview';
-import {actions, messages} from './const';
-import {Dimensions, PixelRatio, Platform, StyleSheet, View, TextInput} from 'react-native';
-import {createHTML} from './editor';
+import React, { Component } from 'react';
+import { WebView } from 'react-native-webview';
+import { actions, messages } from './const';
+import { Dimensions, PixelRatio, Platform, StyleSheet, View, TextInput } from 'react-native';
+import { createHTML } from './editor';
 
 const PlatformIOS = Platform.OS === 'ios';
 
@@ -22,7 +22,7 @@ export default class RichTextEditor extends Component {
         initialContentHTML: '',
         initialFocus: false,
         useContainer: true,
-        editorInitializedCallback: () => {},
+        editorInitializedCallback: () => { },
     };
 
     constructor(props) {
@@ -37,11 +37,11 @@ export default class RichTextEditor extends Component {
         that.setRef = that.setRef.bind(that);
         that.isInit = false;
         that.selectionChangeListeners = [];
-        const {editorStyle: {backgroundColor, color, placeholderColor, cssText, contentCSSText} = {}, html} = props;
+        const { editorStyle: { backgroundColor, color, placeholderColor, cssText, contentCSSText, height } = {}, html } = props;
         that.state = {
-            html: {html: html || createHTML({backgroundColor, color, placeholderColor, cssText, contentCSSText})},
+            html: { html: html || createHTML({ backgroundColor, color, placeholderColor, cssText, contentCSSText }) },
             keyboardHeight: 0,
-            height: 0,
+            height: height ? 50 : 250,
         };
         that.focusListeners = [];
     }
@@ -74,16 +74,16 @@ export default class RichTextEditor extends Component {
         if (newKeyboardHeight) {
             this.setEditorAvailableHeightBasedOnKeyboardHeight(newKeyboardHeight);
         }
-        this.setState({keyboardHeight: newKeyboardHeight});
+        this.setState({ keyboardHeight: newKeyboardHeight });
     }
 
     _onKeyboardWillHide(event) {
-        this.setState({keyboardHeight: 0});
+        this.setState({ keyboardHeight: 0 });
     }
 
     setEditorAvailableHeightBasedOnKeyboardHeight(keyboardHeight) {
-        const {top = 0, bottom = 0} = this.props.contentInset;
-        const {marginTop = 0, marginBottom = 0} = this.props.style;
+        const { top = 0, bottom = 0 } = this.props.contentInset;
+        const { marginTop = 0, marginBottom = 0 } = this.props.style;
         const spacing = marginTop + marginBottom + top + bottom;
 
         const editorAvailableHeight = Dimensions.get('window').height - keyboardHeight - spacing;
@@ -134,22 +134,22 @@ export default class RichTextEditor extends Component {
 
     setWebHeight = (height) => {
         // console.log(height);
-        const {onHeightChange, useContainer} = this.props;
+        const { onHeightChange, useContainer } = this.props;
         if (height !== this.state.height) {
-            useContainer && this.setState({height});
+            useContainer && this.setState({ height });
             onHeightChange && onHeightChange(height);
         }
     };
 
     _sendAction(type, action, data) {
-        let jsonString = JSON.stringify({type, name: action, data});
+        let jsonString = JSON.stringify({ type, name: action, data });
         if (this.webviewBridge) {
             this.webviewBridge.postMessage(jsonString);
         }
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        const {editorStyle} = this.props;
+        const { editorStyle } = this.props;
         if (prevProps.editorStyle !== editorStyle) {
             editorStyle && this.setContentStyle(editorStyle);
         }
@@ -160,8 +160,8 @@ export default class RichTextEditor extends Component {
     }
 
     renderWebView = () => {
-        const {html, editorStyle, useContainer, ...rest} = this.props;
-        const {html: viewHTML} = this.state;
+        const { html, editorStyle, useContainer, ...rest } = this.props;
+        const { html: viewHTML } = this.state;
         // webview dark theme bug
         const opacity = this.isInit ? 1 : 0;
         return (
@@ -189,16 +189,16 @@ export default class RichTextEditor extends Component {
     };
 
     render() {
-        let {height} = this.state;
+        let { height } = this.state;
 
         // useContainer is an optional prop with default value of true
         // If set to true, it will use a View wrapper with styles and height.
         // If set to false, it will not use a View wrapper
-        const {useContainer, style} = this.props;
+        const { useContainer, style } = this.props;
 
         if (useContainer) {
             return (
-                <View style={[style, {height: height || Dimensions.get('window').height * 0.7}]}>
+                <View style={[style, { height: height }]}>
                     {this.renderWebView()}
                 </View>
             );
@@ -268,14 +268,14 @@ export default class RichTextEditor extends Component {
     insertLink(title, url) {
         if (url) {
             this.showAndroidKeyboard();
-            this._sendAction(actions.insertLink, 'result', {title, url});
+            this._sendAction(actions.insertLink, 'result', { title, url });
         }
     }
 
     init() {
         let that = this;
         that.isInit = true;
-        const {initialFocus, initialContentHTML, placeholder, editorInitializedCallback} = that.props;
+        const { initialFocus, initialContentHTML, placeholder, editorInitializedCallback } = that.props;
         that.setContentHTML(initialContentHTML);
         that.setPlaceholder(placeholder);
         editorInitializedCallback();
